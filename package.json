@@ -1,0 +1,22 @@
+{
+  "name": "fhsm",
+  "version": "0.0.1",
+  "description": "A Fast Hierarchical State Machine library",
+  "main": "index.js",
+  "scripts": {
+    "test": "test/all"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/filasienof/nodehsm.git"
+  },
+  "keywords": [
+    "fsm"
+  ],
+  "author": "Fabio N. Filasieno",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/filasienof/nodehsm/issues"
+  },
+  "homepage": "https://github.com/filasienof/nodehsm"
+}
