@@ -1,14 +1,15 @@
 {
   "name": "fhsm",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A Fast Hierarchical State Machine library",
   "main": "index.js",
   "scripts": {
-    "test": "test/all"
+
+    "test": "mocha test/test.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/filasienof/nodehsm.git"
+    "url": "https://github.com/filasienof/fhsm.git"
   },
   "keywords": [
     "fsm"
@@ -16,7 +17,18 @@
   "author": "Fabio N. Filasieno",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/filasienof/nodehsm/issues"
+    "url": "https://github.com/filasienof/fhsm/issues"
   },
-  "homepage": "https://github.com/filasienof/nodehsm"
+  "homepage": "https://github.com/filasienof/fhsm/",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "karma-junit-reporter": "^0.2.2",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-mocha": "^0.1.10",
+    "karma-chai": "^0.1.0",
+    "karma": "^0.12.28",
+    "karma-coverage": "^0.2.7",
+    "mocha": "^2.0.1"
+  }
 }
