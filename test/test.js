@@ -2,17 +2,38 @@ var chai = require('chai');
 var fhsm = require('../src/fhsm');
 var assert = chai.assert;
 
+fhsm.debugMode = true;
+
 describe("A test suite", function () {
 
     function Top(state){
-
+        this.moveTo = function(e, state){
+            this.transition(state);
+        }
     }
-
-    function Main(state){
-
-    }
-
+    function Main(state){}
+    function A(state){}
+    function B(state){}
+    function C(state){}
+    function D(state){}
+    function E(state){}
+    function F(state){}
+    function Other(state){}
     var Invalid = function(state) { };
+    fhsm.state(Top);
+    fhsm.state(Main, Top);
+    fhsm.state(A, Main);
+    fhsm.state(B, Main);
+    fhsm.state(C, A);
+    fhsm.state(D, A);
+    fhsm.state(E, B);
+    fhsm.state(F, B);
+    console.log(fhsm.stateTrace(Top));
+
+    function TestObj(){
+        fhsm.init(this, Top);
+    }
+    var o = new TestObj();
 
     it('invalid state setup', function () {
         try {
@@ -26,7 +47,7 @@ describe("A test suite", function () {
 
     it('top state setup with error on parent Constructor', function () {
         try{
-            fhsm.state(Top, 10);
+            fhsm.state(Other, 10);
         } catch(err) {
             assert(err.name == 'StateInitializationError');
             return;
@@ -34,15 +55,12 @@ describe("A test suite", function () {
         assert(false);
     });
 
-    var TopState;
     it('setup of the Top State', function () {
-        TopState = fhsm.state(Top);
-        assert(TopState._initialState == null);
-        assert(TopState._subStates instanceof Array);
-        assert(TopState._subStates.length == 0);
+        assert(Top.prototype._initialState == Main.prototype);
+        assert(Top.prototype._subStates instanceof Array);
+        assert(Top.prototype._subStates.length == 1);
     });
 
-    var MainState;
     it('already initialized TopState', function () {
         try {
             MainState = fhsm.state(Top, Main);
@@ -51,6 +69,13 @@ describe("A test suite", function () {
         }
     });
 
-    // TODO: about to test all HSM cases
+    it('case a', function () {
+        o.send('moveTo', C);
+    });
+
+    it('case b', function () {
+        o.send('moveTo', D);
+    });
+
 });
 
