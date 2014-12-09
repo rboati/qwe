@@ -18,7 +18,7 @@ describe("A test suite", function () {
         try {
             fhsm.state(Invalid);
         } catch(err){
-            assert(err instanceof TypeError);
+            assert(err.constructor instanceof exports.StateInitializationError);
             return;
         }
         assert(false, 'An exception should have occurred');
@@ -28,14 +28,38 @@ describe("A test suite", function () {
         try{
             fhsm.state(Top, 10);
         } catch(err) {
-            assert(err instanceof TypeError);
+            assert(err instanceof exports.StateInitializationError);
             return;
         }
         assert(false);
     });
 
-    it('should NOT be ok', function () {
-        assert.equal(1,1);
+    var TopState;
+    it('setup of the Top State', function () {
+        TopState = fhsm.state(Top);
+        assert(TopState._initialState == null);
+        assert(TopState._subStates instanceof Array);
+        assert(TopState._subStates.length == 0);
+    });
+
+    var MainState;
+    it('already initialized TopState', function () {
+        try {
+            MainState = fhsm.state(Top, Main);
+        } catch (err) {
+
+            assert(err instanceof exports.StateInitializationError);
+        }
+    });
+
+    var MainState;
+    it('already initialized TopState', function () {
+        try {
+            MainState = fhsm.state(Main, Top);
+        } catch (err) {
+            assert(err instanceof TypeError);
+            return;
+        }
     });
 
 });

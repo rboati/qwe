@@ -1,0 +1,12 @@
+Benchmark 1: Unsliced Monkey Patching
+ 1000001 Iterations => 86
+10000001 Iterations => 758
+
+Benchmark 2: Proto swap
+ 1000001 Iterations => 3295
+10000001 Iterations => 33220
+
+Benchmark 2: Sliced Monkey Patching
+ 1000001 Iterations => 1254
+10000001 Iterations => 13147
+

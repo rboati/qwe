@@ -1,5 +1,42 @@
 function configure(exports) {
+    "use strict";
 
+    //Local assertion definition to reduce dependencies
+    function AssertionError(message) {
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, this.constructor);
+        }
+        this.name = this.constructor.name;
+        this.message = message;
+    }
+
+    AssertionError.prototype.__proto__ = Error.prototype;
+    AssertionError.prototype.toString = function () {
+        return this.name + ': ' + this.message;
+    };
+
+
+    function assert(contidion, message) {
+        if (!contidion) {
+            throw new AssertionError(message);
+        }
+    }
+
+    function StateInitializationError(message) {
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, this.constructor);
+        }
+
+        this.name = this.constructor.name;
+        this.message = message;
+    }
+
+    StateInitializationError.prototype.__proto__ = Error.prototype;
+    StateInitializationError.prototype.toString = function () {
+        return this.name + ': ' + this.message
+    }
+
+    // State definition initialization
     function State() {
 
     }
@@ -45,9 +82,9 @@ function configure(exports) {
     //    return result;
     //}
 
-    //function initHsm(obj, stateConstructor) {
-    //
-    //}
+    function init(obj, stateConstructor) {
+
+    }
 
     function postProcessState(state) {
         state._entry = state._entry || function () {
@@ -58,32 +95,35 @@ function configure(exports) {
 
     function state(constructor, parentConstructor, isInitialState) {
         if (constructor.name == '') {
-            throw new TypeError('"constructor" is not named Function; Anonymous functions are not valid constructors')
+            throw new StateInitializationError('"constructor" is not a named Function; Anonymous functions are not valid State constructors')
+        }
+        if (constructor.prototype instanceof State) {
+            throw new StateInitializationError('state ' + constructor.name + ' already initialized')
         }
 
         var state;
 
-        if (parentConstructor === undefined) {
+        if (parentConstructor === undefined || parentConstructor === State) {
             state = new State();
             constructor.call(state);
             postProcessState(state);
+            state.constructor = constructor;
+            state.__proto__ = State.prototype;
+            state._subStates = [];
+            state._initialState = null;
+
             constructor.prototype = state;
-            constructor.prototype.constructor = constructor;
-            constructor.prototype.__proto__ = State.prototype;
-            return constructor.prototype;
+            return state;
         }
 
         if (!(parentConstructor instanceof Function)) {
-            throw new TypeError('parent constructor is not a Function');
+            throw new StateInitializationError('parent constructor is not a Function');
         }
         if (!(parentConstructor.prototype instanceof State)) {
-            if (parentConstructor != State) {
-                throw new TypeError('parentConstructor is not a State constructor.');
-            }
+            throw new StateInitializationError('parentConstructor is not a State constructor:');
         }
-        constructor.prototype.__proto__ = parentConstructor.prototype;
-        if (parentConstructor.prototype === State)
-            return constructor.prototype;
+
+
         var parentSubStates = parentConstructor.prototype._subStates;
         var parentInitialState = parentConstructor.prototype._initialState;
         if (parentSubStates === undefined) {
@@ -111,11 +151,12 @@ function configure(exports) {
         }
         // else if false do nothing
         return constructor.prototype
-    };
+    }
 
     exports.state = state;
-
-
+    exports.State = State;
+    exports.init = init;
+    exports.StateInitializationError = StateInitializationError;
 }
 
 configure(typeof exports === 'undefined' ? this.fhsm = {} : exports);
