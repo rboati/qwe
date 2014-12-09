@@ -2,6 +2,8 @@ function configure(exports) {
     "use strict";
     // HSM Error definitions
 
+    exports.debugMode = false;
+
     function errorToString() { return this.name + ': ' + this.message; }
 
     function DoesNotUnderstandError(state, event, args) {
@@ -65,18 +67,53 @@ function configure(exports) {
     function State(stateConstructor, parentState) {
         this._initialState = null;
         this._subStates = [];
+        this._transitionTable = {};
         this.constructor = stateConstructor;
         stateConstructor.prototype = this;
         stateConstructor.call(this);
         this._error = this._error || function (e, err) { throw err; };
         this._doesNotUnderstand = this._doesNotUnderstand || function (e, evt, args) { throw new DoesNotUnderstandError(state, evt, args); };
-        this._enter = this._enter || function () { };
-        this._exit = this._exit || function () { };
+
+        if (exports.debugMode) {
+            if (this._enter !== undefined) {
+                var userDefinedEnter = this._enter;
+                this._enter = function () {
+                    console.log('enter ' + this.getStateName());
+                    userDefinedEnter.call(this);
+                }
+            } else {
+                this._enter = function () {
+                    console.log('enter ' + this.getStateName());
+                };
+            }
+        } else {
+            this._enter = this._enter || function(){}
+        }
+
+        if (exports.debugMode) {
+            if (this._exit !== undefined) {
+                var userDefinedExit = this._exit;
+                this._exit = function () {
+                    userDefinedExit.call(this);
+                    console.log('exit ' + this.getStateName());
+                }
+            } else {
+                this._exit = function () {
+                    console.log('exit ' + this.getStateName());
+                };
+            }
+        } else {
+            this._exit = this._exit || function(){}
+        }
+
         if (parentState !== undefined)
             this.__proto__ = parentState;
     }
 
-    State.prototype.getName = function(){ return this.constructor.name; };
+    State.prototype.getStateName = function(){ return this.constructor.name; };
+
+    State.prototype.getParentState = function(){ return this.__proto__; };
+    State.prototype.getParentStateName = function(){ return this.__proto__.constructor.name; };
 
     State.prototype.hasSubState = function(stateName){
         var len = this._subStates.length;
@@ -95,8 +132,9 @@ function configure(exports) {
             throw new StateInitializationError('state ' + constructor.name + ' already initialized')
         if (parentConstructor === undefined || parentConstructor === State)
             return new State(constructor);
-        if (!(parentConstructor instanceof Function))
+        if (typeof parentConstructor != 'function') {
             throw new StateInitializationError('parent constructor is not a Function');
+        }
         if (!(parentConstructor.prototype instanceof State))
             throw new StateInitializationError("parentConstructor is not an initialized State constructor; call state(<your constructor>)");
         var parentSubStates = parentConstructor.prototype._subStates;
@@ -105,21 +143,24 @@ function configure(exports) {
         if (parentConstructor.prototype.hasSubState(constructor.name)) {
             throw new StateInitializationError("State '"+constructor.name+"' is already initialized")
         }
-        parentSubStates.push(constructor.prototype);
         if (isInitialState == true) {
             // Force Initial State Setup; don't care of current initial state
             state = new State(constructor, parentConstructor.prototype);
+            parentSubStates.push(state);
             parentConstructor.prototype._initialState = state;
             return state;
         } else if (isInitialState === undefined) {
             state = new State(constructor, parentConstructor.prototype);
+            parentSubStates.push(state);
             if (parentInitialState == null)
                 parentConstructor.prototype._initialState = constructor.prototype;
             return state;
         } else if (typeof true != 'boolean') {
             throw new TypeError('isInitialState must be a boolean')
         }
-        return new State(constructor, parentConstructor.prototype); // else if false do nothing and return state
+        state = new State(constructor, parentConstructor.prototype); // else if false do nothing and return state
+        parentSubStates.push(state);
+        return state;
     }
 
     // HSM Object
@@ -139,7 +180,7 @@ function configure(exports) {
         try {
             hsm.__state__._enter.call(hsm);
         } catch (err) {
-            throw new TransitionError("An error was thrown by the '_enter' callback", hsm.__state__.prototype, state, err);
+            throw new TransitionError("An error was thrown by the '_enter' callback", hsm.__state__, state, err);
         }
         hsm.__locked__ = false;
     }
@@ -163,27 +204,117 @@ function configure(exports) {
         }
     }
 
-    Hsm.prototype.getCurrentState = function () {
+    Hsm.prototype.getState = function () {
         return this.__state__;
     };
 
-    Hsm.prototype.getCurrentStateName = function () {
-        return this.__state__.getName();
+    Hsm.prototype.getStateName = function () {
+        return this.__state__.getStateName();
     };
 
     Hsm.prototype.transition = function (stateConstructor) {
-        var state = stateConstructor.prototype;
-        enterState(this, state);
-        this.__state__ = state;
-        exitState(this, state);
-    };
+        assert(stateConstructor instanceof Function);
+        assert(stateConstructor.prototype instanceof State);
+        assert(stateConstructor !== State, 'Illegal transition target');
 
-    Hsm.prototype.transition = function (stateConstructor) {
-        var state = stateConstructor.prototype;
-        if (state == this.__state__) return;
-        exitState(this, state);
-        this.__state__ = state;
-        enterState(this, state);
+        var targetState = stateConstructor.prototype;
+        var sourceState = this.__state__;
+        assert(targetState, 'undefined target state');
+
+        // Close Cases
+
+        if (targetState === sourceState) {
+            exitState(this, sourceState);
+            enterState(this, sourceState);
+            return;
+        }
+
+        if (sourceState == targetState.__proto__){
+            this.__state__ = targetState;
+            enterState(this, targetState);
+            return;
+        }
+
+        if (sourceState.__proto__ == targetState.__proto__){
+            exitState(this, sourceState);
+            this.__state__ = targetState;
+            enterState(this, targetState);
+            return;
+        }
+
+        if (sourceState.__proto__ == targetState){
+            exitState(this, sourceState);
+            this.__state__ = targetState;
+            return;
+        }
+
+        // Source is a Parent of Target ?
+        var s;
+        var targetAncestors = [targetState];
+        s = targetState.__proto__;
+        for (;;) {
+            if (s.__proto__ == State) break; //search miss
+            targetAncestors.push(s);
+            s = s.__proto__;
+            if (s == sourceState){
+                // Search hit
+                while (!targetAncestors.isEmpty()){
+                    s = targetAncestors.pop();
+                    enterState(this, targetState);
+                    this.__state__ = s;
+                }
+                return;
+            }
+        }
+
+        // Target is a Parent of Source ?
+        var sourceAncestors = [sourceState];
+        s = sourceState.__proto__;
+        for (;;) {
+            if (s.__proto__ == State) break; //search miss
+            sourceAncestors.push(s);
+            s = s.__proto__;
+            if (s == targetState){
+                // Search hit
+                for (var i = 0; i < sourceAncestors.length; ++i){
+                    s = sourceAncestors[i];
+                    this.__state__ = s;
+                    exitState(this, targetState);
+                }
+                return;
+            }
+        }
+
+        // Find least common ancestor
+        var sourceLCAIndex = null;
+        var targetLCAIndex = null;
+        for (var j = 0; j < targetAncestors.length; ++j) {
+            for (var k = 0; k < sourceAncestors.length; ++k){
+                if (sourceAncestors[j] == targetAncestors[k]){
+                    sourceLCAIndex = j;
+                    targetLCAIndex = k;
+                }
+            }
+        }
+
+        for (j = 1; j < sourceLCAIndex; ++j){
+            exitState(this, sourceAncestors[j]);
+            this.__state__ = sourceAncestors[j];
+
+        }
+        k = targetLCAIndex;
+        do {
+            enterState(this, targetAncestors[k]);
+            this.__state__ = targetAncestors[j];
+            --k;
+        } while (k != 0);
+
+        // Drill down a non Leaf state
+        while (this.__state__._initialState != null){
+            enterState(this, this.__state__._initialState);
+            this.__state__ = this.__state__._initialState;
+        }
+        enterState(this, this.__state__);
     };
 
     Hsm.prototype.send = function send(e) {
@@ -235,82 +366,93 @@ function configure(exports) {
         enterState(object, object.__state__);
     }
 
+    function stateTrace(topState){
+        function write(lev, state, lines){
+            var text = '';
+            if (lev > 0){
+                var i = 0;
+                for (; i < lev; ++i){
+                    text += '   ';
+                }
+                text += '|- ';
+                ++i;
+            }
+            if (lev == 0)
+                text += ' - ';
+            text += state.getStateName();
+            if (state.__proto__._initialState == state)
+                text += '*';
+            lines.push(text);
+            for (i = 0; i < state._subStates.length; ++i){
+                write(lev + 1, state._subStates[i], lines);
+            }
+        }
+        var l = [];
+        write(0, topState.prototype, l);
+        return l.join('\n');
+    }
+
     exports.DoesNotUnderstandError = DoesNotUnderstandError;
     exports.TransitionError = TransitionError;
     exports.NestedTransitionError = NestedTransitionError;
+    exports.StateInitializationError = StateInitializationError;
     exports.state = state;
     exports.init = init;
+    exports.stateTrace = stateTrace;
+
     return exports;
 }
+
 
 var fhsm = configure(typeof exports === 'undefined' ? this.fhsm = {} : exports);
 
 // ----------------- cut here
 // Test of the preliminary NON hierarchical state machine
-
-function MyObject() {
-    this.objName = 'Fabio';
-    this.objSurname = 'Filasieno';
-    fhsm.init(this, Main);
-}
-
-MyObject.prototype.setName = function (n, s) {
-    this.objName = n;
-    this.objSurname = s;
-};
-
-function Main() {
-    this._enter = function () {
-        console.log('enter TopState');
-    };
-    this._exit = function () {
-        console.log('exit TopState');
-    };
-    this.hey = function (e) {
-        console.log(this.objName + ' ' + this.objSurname + ' says "hey" in state "'+this.getCurrentStateName()+'"' );
-        this.transition(B);
-    };
-}
-
-function A() {
-
-    this._enter = function () {
-        console.log('enter StateA');
-    };
-    this._exit = function () {
-        console.log('exit StateA');
-    };
-
-}
-
-function B() {
-
-    this.fail = function (e) {
-        throw new Error('An Error')
-    };
-    this._error = function (e, err, evt, args) {
-        console.log('An Error occurred: ' + err.toString() + ' while processing the event "' + evt + '"');
-    };
-    this._enter = function () {
-        console.log('enter StateB');
-    };
-    this._exit = function () {
-        console.log('exit StateB');
-    }
-}
-
-fhsm.state(Main);
-fhsm.state(A, Main);
-fhsm.state(B, Main);
-
-
-var obj = new MyObject;
-obj.send('hey');
-obj.send('hey');
-obj.send('hey');
-obj.send('fail');
-
-
+//
+//function MyObject() {
+//    this.objName = 'Fabio';
+//    this.objSurname = 'Filasieno';
+//    fhsm.init(this, Main);
+//}
+//
+//MyObject.prototype.setName = function (n, s) {
+//    this.objName = n;
+//    this.objSurname = s;
+//};
+//
+//fhsm.debugMode = true;
+//
+//function Main() {
+//    this.hey = function (e) {
+//        console.log(this.objName + ' ' + this.objSurname + ' says "hey" in state "'+this.getStateName()+'"' );
+//    };
+//
+//    this.moveTo = function (e, state) {
+//        this.send('hey');
+//        this.transition(state);
+//    };
+//}
+//function A() {}
+//function B() {}
+//function C() {}
+//function D() {}
+//function E() {}
+//function F() {}
+//
+//fhsm.state(Main);
+//fhsm.state(A, Main);
+//fhsm.state(B, Main);
+//fhsm.state(C, A);
+//fhsm.state(D, A);
+//fhsm.state(E, B);
+//fhsm.state(F, B);
+//
+//console.log(fhsm.stateTrace(Main));
+//var obj = new MyObject;
+////obj.send('moveTo', C);
+//
+//
+//
 
 
 
