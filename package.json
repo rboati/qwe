@@ -1,14 +1,14 @@
 {
-  "name": "fhsm",
-  "version": "0.0.9",
-  "description": "(NOT READY YET) A Fast Hierarchical State Machine library",
+  "name": "qwe",
+  "version": "0.0.2",
+  "description": "A Fast Hierarchical State Machine library",
   "main": "index.js",
   "scripts": {
     "test": "mocha test/test.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/filasienof/fhsm.git"
+    "url": "https://github.com/filasienof/qwe.git"
   },
   "keywords": [
     "fsm"
@@ -16,9 +16,9 @@
   "author": "Fabio N. Filasieno",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/filasienof/fhsm/issues"
+    "url": "https://github.com/filasienof/qwe/issues"
   },
-  "homepage": "https://github.com/filasienof/fhsm/",
+  "homepage": "https://github.com/filasienof/qwe/",
   "dependencies": {
   },
   "devDependencies": {
