@@ -12,16 +12,7 @@
 <body>
 <div id="container-box">
     <div id="left-col">
-        <h2>Diagram</h2>
 
-        <p class="diagram-description">
-            States are classified in <strong>leaf</strong> and <strong>non-leaf</strong> states:
-        <ul class="diagram-description">
-            <li class="diagram-description"><strong>leaf states</strong> are colored in blue have no children</li>
-            <li class="diagram-description"><strong>non-leaf states</strong> have at least one child that is marked (*)
-                as an initial state
-            </li>
-        </ul>
         <h2 id="diagramTitle">Click the on a state and watch the log</h2>
 
         <div id="a-box" class="box">
@@ -61,18 +52,28 @@
     </div>
     <div id="right-col">
         <div id="right-col-container">
+            <h2>Diagram</h2>
+            <p class="diagram-description">
+                States are classified in <strong>leaf</strong> and <strong>non-leaf</strong> states:
+            <ul class="diagram-description">
+                <li class="diagram-description"><strong>leaf states</strong> are colored in blue have no children</li>
+                <li class="diagram-description"><strong>non-leaf states</strong> have at least one child that is marked (*)
+                    as an initial state
+                </li>
+            </ul>
             <div id="log-container">
                 <h2>Log</h2>
                 <button id="reset">Restart</button>
                 <br/>
-                <textarea id="log" rows="20" cols="50" title="Log"></textarea>
-            </div>
-            <div id="tools">
-                <h2>Source</h2>
+                <textarea id="log" rows="23" cols="60" title="Log"></textarea>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    console.log('Hello world');
+</script>
 </body>
 </html>
 

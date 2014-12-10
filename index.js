@@ -1,4 +1,4 @@
-exports = require('./src/fhsm');
+exports = require('./src/qwe');
 
 for (var k in exports) {
     if (exports.hasOwnProperty(k))

@@ -4,7 +4,10 @@
   "description": "A Fast Hierarchical State Machine library",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/test.js"
+    "test": "mocha test/test.js",
+    "doc": "jsdoc2md src/qwe.js > api.md",
+    "clean": "node tools/clean.js",
+    "minify": "uglifyjs src/qwe.js > web/js/qwe.min.js"
   },
   "repository": {
     "type": "git",
@@ -18,10 +21,13 @@
   "bugs": {
     "url": "https://github.com/filasienof/qwe/issues"
   },
-  "homepage": "https://github.com/filasienof/qwe/",
+  "homepage": "https://github.com/filasienof/qwe/wiki",
   "dependencies": {
+
   },
   "devDependencies": {
+    "docco": "^0.6.3",
+    "literate-programming": "^0.8.2",
     "karma-junit-reporter": "^0.2.2",
     "karma-chrome-launcher": "^0.1.7",
     "karma-mocha": "^0.1.10",
@@ -32,6 +38,7 @@
     "jsdoc": "^3.3.0-alpha11",
     "jsdox": "^0.4.4",
     "process": "^0.9.0",
-    "marked": "^0.3.2"
+    "marked": "^0.3.2",
+    "grunt": "^0.4.5"
   }
 }

@@ -1,7 +1,7 @@
 function configure(exports) {
     "use strict";
     // HSM Error definitions
-    exports.debugMode = false;
+    exports.traceMode = false;
 
     function errorToString() { return this.name + ': ' + this.message; }
 
@@ -75,7 +75,7 @@ function configure(exports) {
         this._error = this._error || function (e, err) { throw err; };
         this._doesNotUnderstand = this._doesNotUnderstand || function (e, evt, args) { throw new DoesNotUnderstandError(state, evt, args); };
 
-        if (exports.debugMode) {
+        if (exports.traceMode) {
             if (this._enter !== undefined) {
                 var userDefinedEnter = this._enter;
                 this._enter = function () {
@@ -91,7 +91,7 @@ function configure(exports) {
             this._enter = this._enter || function(){}
         }
 
-        if (exports.debugMode) {
+        if (exports.traceMode) {
             if (this._exit !== undefined) {
                 var userDefinedExit = this._exit;
                 this._exit = function () {
@@ -160,30 +160,7 @@ function configure(exports) {
     // HSM Object
     function Hsm() {}
 
-    function enterState(hsm, state) {
-        if (hsm.__locked__)
-            throw new TransitionError('Cannot execute a transition while entering a state', hsm.__state__, state, new NestedTransitionError(hsm.__state__, state));
-        hsm.__locked__ = true;
-        try {
-            hsm.__state__._enter.call(hsm);
-        } catch (err) {
-            throw new TransitionError("An error was thrown by the '_enter' callback", hsm.__state__, state, err);
-        }
-        hsm.__locked__ = false;
-    }
 
-    function exitState(hsm, state) {
-        if (hsm.__locked__)
-            throw new TransitionError('Cannot execute a transition while exiting a state', hsm.__state__, state, new NestedTransitionError(hsm.__state__, state));
-        hsm.__locked__ = true;
-        try {
-            hsm.__state__._exit.call(hsm);
-        } catch (err) {
-            throw new TransitionError("An error was thrown by the '_exit' callback", this.__state__, state, err);
-        } finally {
-            hsm.__locked__ = false;
-        }
-    }
 
     Hsm.prototype.getState = function () {
         return this.__state__;

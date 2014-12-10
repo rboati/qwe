@@ -1,8 +1,7 @@
-var chai = require('chai');
-var fhsm = require('../src/fhsm');
-var assert = chai.assert;
+var assert = require('chai').assert;
+var qwe = require('../src/qwe');
 
-fhsm.debugMode = true;
+qwe.traceMode = true;
 
 describe("A test suite", function () {
 
@@ -20,24 +19,24 @@ describe("A test suite", function () {
     function F(state){}
     function Other(state){}
     var Invalid = function(state) { };
-    fhsm.state(Top);
-    fhsm.state(Main, Top);
-    fhsm.state(A, Main);
-    fhsm.state(B, Main);
-    fhsm.state(C, A);
-    fhsm.state(D, A);
-    fhsm.state(E, B);
-    fhsm.state(F, B);
-    console.log(fhsm.stateTrace(Top));
+    qwe.state(Top);
+    qwe.state(Main, Top);
+    qwe.state(A, Main);
+    qwe.state(B, Main);
+    qwe.state(C, A);
+    qwe.state(D, A);
+    qwe.state(E, B);
+    qwe.state(F, B);
+    console.log(qwe.stateTrace(Top));
 
     function TestObj(){
-        fhsm.init(this, Top);
+        qwe.init(this, Top);
     }
     var o = new TestObj();
 
     it('invalid state setup', function () {
         try {
-            fhsm.state(Invalid);
+            qwe.state(Invalid);
         } catch(err){
             assert(err.name == 'StateInitializationError');
             return;
@@ -47,7 +46,7 @@ describe("A test suite", function () {
 
     it('top state setup with error on parent Constructor', function () {
         try{
-            fhsm.state(Other, 10);
+            qwe.state(Other, 10);
         } catch(err) {
             assert(err.name == 'StateInitializationError');
             return;
@@ -63,7 +62,7 @@ describe("A test suite", function () {
 
     it('already initialized TopState', function () {
         try {
-            MainState = fhsm.state(Top, Main);
+            MainState = qwe.state(Top, Main);
         } catch (err) {
             assert(err.name == 'StateInitializationError');
         }
