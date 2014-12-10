@@ -108,7 +108,6 @@ function configure(exports) {
         if (parentState !== undefined)
             this.__proto__ = parentState;
     }
-
     State.prototype.getStateName = function(){ return this.constructor.name; };
     State.prototype.getParentState = function(){ return this.__proto__; };
     State.prototype.getParentStateName = function(){ return this.__proto__.constructor.name; };
@@ -129,17 +128,15 @@ function configure(exports) {
             throw new StateInitializationError('state ' + constructor.name + ' already initialized');
         if (parentConstructor === undefined || parentConstructor === State)
             return new State(constructor);
-        if (typeof parentConstructor != 'function') {
+        if (typeof parentConstructor != 'function')
             throw new StateInitializationError('parent constructor is not a Function');
-        }
         if (!(parentConstructor.prototype instanceof State))
             throw new StateInitializationError("parentConstructor is not an initialized State constructor; call state(<your constructor>)");
         var parentSubStates = parentConstructor.prototype._subStates;
         var parentInitialState = parentConstructor.prototype._initialState;
         assert(parentSubStates instanceof Array);
-        if (parentConstructor.prototype.hasSubState(constructor.name)) {
+        if (parentConstructor.prototype.hasSubState(constructor.name))
             throw new StateInitializationError("State '" + constructor.name + "' is already initialized");
-        }
         if (isInitialState == true) {
             // Force Initial State Setup; don't care of current initial state
             state = new State(constructor, parentConstructor.prototype);
@@ -161,13 +158,11 @@ function configure(exports) {
     }
 
     // HSM Object
-
     function Hsm() {}
 
     function enterState(hsm, state) {
-        if (hsm.__locked__) {
+        if (hsm.__locked__)
             throw new TransitionError('Cannot execute a transition while entering a state', hsm.__state__, state, new NestedTransitionError(hsm.__state__, state));
-        }
         hsm.__locked__ = true;
         try {
             hsm.__state__._enter.call(hsm);
@@ -208,7 +203,6 @@ function configure(exports) {
         assert(targetState, 'undefined target state');
 
         // Close Cases
-
         if (targetState === sourceState) {
             exitState(this, sourceState);
             enterState(this, sourceState);
@@ -373,7 +367,7 @@ function configure(exports) {
         }
         var l = [];
         write(0, topState.prototype, l);
-        return l.join('\n');
+        return l.join('\n') + '\n';
     }
 
     exports.DoesNotUnderstandError = DoesNotUnderstandError;
@@ -405,30 +399,37 @@ var fhsm = configure(typeof exports === 'undefined' ? this.fhsm = {} : exports);
 //
 //fhsm.debugMode = true;
 //
-//function Main() {
-//    this.hey = function (e) {
-//        console.log(this.objName + ' ' + this.objSurname + ' says "hey" in state "'+this.getStateName()+'"' );
-//    };
-//
-//    this.moveTo = function (e, state) {
-//        this.send('hey');
-//        this.transition(state);
-//    };
-//}
-//function A() {}
-//function B() {}
-//function C() {}
-//function D() {}
-//function E() {}
-//function F() {}
-//
-//fhsm.state(Main);
-//fhsm.state(A, Main);
-//fhsm.state(B, Main);
-//fhsm.state(C, A);
-//fhsm.state(D, A);
-//fhsm.state(E, B);
-//fhsm.state(F, B);
+function Main() {
+    this.hey = function (e) {
+        console.log(this.objName + ' ' + this.objSurname + ' says "hey" in state "' + this.getStateName() + '"');
+    };
+
+    this.moveTo = function (e, state) {
+        this.send('hey');
+        this.transition(state);
+    };
+}
+function A() {
+}
+function B() {
+}
+function C() {
+}
+function D() {
+}
+function E() {
+}
+function F() {
+}
+
+fhsm.state(Main);
+fhsm.state(A, Main);
+fhsm.state(B, Main);
+fhsm.state(C, A);
+fhsm.state(D, A);
+fhsm.state(E, B);
+fhsm.state(F, B);
+console.log(fhsm.stateTrace(Main));
 //
 //console.log(fhsm.stateTrace(Main));
 //var obj = new MyObject;

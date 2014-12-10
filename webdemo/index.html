@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>FHSM Demo</title>
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div id="container-box">
+    <div id="left-col">
+        <h2>Diagram</h2>
+
+        <p class="diagram-description">
+            States are classified in <strong>leaf</strong> and <strong>non-leaf</strong> states:
+        <ul class="diagram-description">
+            <li class="diagram-description"><strong>leaf states</strong> are colored in blue have no children</li>
+            <li class="diagram-description"><strong>non-leaf states</strong> have at least one child that is marked (*)
+                as an initial state
+            </li>
+        </ul>
+        <h2 id="diagramTitle">Click the on a state and watch the log</h2>
+
+        <div id="a-box" class="box">
+            state <strong>A</strong>
+
+            <div id="b-box" class="box">
+                state <strong>B</strong> <span class="first-state">*</span>
+
+                <div id="c-box" class="box">
+                    state <strong>C</strong>
+
+                    <div id="d-box" class="box">
+                        state <strong>D</strong> <span class="first-state">*</span><br/><br/>
+                    </div>
+                    <div id="e-box" class="box">
+                        state <strong>E</strong><br/>
+                    </div>
+                </div>
+                <div id="f-box" class="box">
+                    state <strong>F</strong> <span class="first-state">*</span>
+
+                    <div id="g-box" class="box">
+                        state <strong>G</strong><br/>
+                    </div>
+                    <div id="h-box" class="box">
+                        state <strong>H</strong> <span class="first-state">*</span><br/>
+                    </div>
+                </div>
+                <div id="x-box" class="box">
+                    state <strong>X</strong>
+                </div>
+            </div>
+            <div id="y-box" class="box">
+                state <strong>Y</strong>
+            </div>
+        </div>
+    </div>
+    <div id="right-col">
+        <div id="right-col-container">
+            <div id="log-container">
+                <h2>Log</h2>
+                <button id="reset">Restart</button>
+                <br/>
+                <textarea id="log" rows="20" cols="50" title="Log"></textarea>
+            </div>
+            <div id="tools">
+                <h2>Source</h2>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+<!--
+
+           -->
