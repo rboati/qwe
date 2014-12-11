@@ -89,10 +89,10 @@ function configure(exports) {
     function defineState(stateConstructor) {
         var state = new State;
         stateConstructor.call(state);
-        state._error = state._error || function (e, err) {
+        state.error = state.error || function (e, err) {
             throw err;
         };
-        state._doesNotUnderstand = state._doesNotUnderstand || function (e, evt, args) {
+        state.doesNotUnderstandError = state.doesNotUnderstandError || function (e, evt, args) {
             throw new DoesNotUnderstandError(evt, args);
         };
         state._enter = state._enter || function () {
@@ -123,12 +123,12 @@ function configure(exports) {
             throw new StateInitializationError("parentConstructor is not an initialized State constructor; call state(<your constructor>)");
         }
 
-        var parentSubStates = parentConstructor.prototype._subStates;
-        var parentInitialState = parentConstructor.prototype._initialState;
+        var parentSubStates = parentConstructor.prototype.subStates;
+        var parentInitialState = parentConstructor.prototype.initialState;
         if (parentSubStates === undefined) {
             parentSubStates = [];
             parentSubStates.push(constructor.prototype);
-            parentConstructor.prototype._subStates = parentSubStates;
+            parentConstructor.prototype.subStates = parentSubStates;
         } else {
             assert(parentSubStates instanceof Array);
             if (parentSubStates.indexOf(constructor.prototype) == -1) {
@@ -138,12 +138,12 @@ function configure(exports) {
 
         if (isInitialState == true) {
             // Force Initial State Setup; don't care of current initial state
-            parentConstructor.prototype._initialState = constructor.prototype;
+            parentConstructor.prototype.initialState = constructor.prototype;
         } else if (isInitialState === undefined) {
             if (parentInitialState === undefined || parentInitialState == null) {
-                parentConstructor.prototype._initialState = constructor.prototype;
+                parentConstructor.prototype.initialState = constructor.prototype;
             } else {
-                parentConstructor.prototype._initialState = null;
+                parentConstructor.prototype.initialState = null;
             }
         } else if (typeof true != 'boolean') {
             throw new TypeError('isInitialState must be a boolean')
@@ -210,23 +210,23 @@ function configure(exports) {
     Hsm.prototype.send = function send(e) {
         var f = this.__behaviour__[e];
         if (f === undefined) {
-            this.__behaviour__._doesNotUnderstand.call(this, '_doesNotUnderstand', e, arguments)
+            this.__behaviour__.doesNotUnderstandError.call(this, '_doesNotUnderstand', e, arguments)
         }
         try {
             f.apply(this, arguments);
         } catch (err) {
-            this.__behaviour__._error.call(this, '_error', err, e, arguments);
+            this.__behaviour__.error.call(this, '_error', err, e, arguments);
         }
     };
     Hsm.prototype.handleEvent = function (event) {
         var f = this.__behaviour__[e];
         if (f === undefined) {
-            this.__behaviour__._doesNotUnderstand.call(this, '_doesNotUnderstand', e, arguments)
+            this.__behaviour__.doesNotUnderstandError.call(this, '_doesNotUnderstand', e, arguments)
         }
         try {
             f.apply(this, arguments);
         } catch (err) {
-            this.__behaviour__._error.call(this, '_error', err, e, arguments);
+            this.__behaviour__.error.call(this, '_error', err, e, arguments);
         }
     };
     Hsm.prototype.listen = function (event, eventEmitter) {
@@ -293,7 +293,7 @@ function StateB() {
     this.fail = function (e) {
         throw new Error('An Error')
     };
-    this._error = function (e, err, evt, args) {
+    this.error = function (e, err, evt, args) {
         console.log('An Error occurred: ' + err.toString() + ' while processing the event "' + evt + '"');
     };
     this._enter = function () {

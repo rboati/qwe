@@ -1,33 +1,36 @@
-var x = eval('function Test(){}');
-var s = Test;
-console.log(Test);
-
-function send(obj, event) {
-    obj.__behaviour__[event].apply(obj, arguments);
+function initObj(obj, state){
+    function dispatch(evt){
+        var callee = arguments.callee;
+        var state = callee.state;
+        var handler = state[evt];
+        handler.apply(this, arguments);
+    }
+    dispatch.state = state;
+    obj.send = dispatch;
+    return obj;
 }
 
-function route(arguments) {
-    arguments[0].__behaviour__[arguments[1]].apply(arguments[0], arguments);
+function tran(obj, state) {
+    obj.send.state = state
 }
 
-var beta = {
-    __behaviour__: {
-        evt: function (obj, evt) {
-            console.log('beta received: ' + evt)
-
-        }
-    }
+var Left = {
+    name: 'Left',
+    x: function(evt){ console.log(this.send.state.name + ':x'); tran(this, Right);},
+    y: function(evt){ console.log(this.send.state.name + ':y'); tran(this, Right);}
+};
+var Right = {
+    name: 'Right',
+    x: function(evt){ console.log(this.send.state.name + ':x'); tran(this, Left);},
+    y: function(evt){ console.log(this.send.state.name + ':y'); tran(this, Left);}
 };
 
-var alpha = {
-    __behaviour__: {
-        evt: function (obj, evt) {
-            console.log('alpha received: ' + evt);
-            arguments[0] = beta;
-            route(arguments);
-        }
-    }
-};
-
-
-send(alpha, 'evt', 'hello');
+var o1 = initObj({}, Left);
+var o2 = initObj({}, Right);
+console.log(o1);
+console.log(o2);
+o1.send('x');
+o1.send('y');
+o2.send('x');
+console.log(o1);
+console.log(o2);
