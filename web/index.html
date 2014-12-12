@@ -109,7 +109,7 @@
             // Put here any state you want
         }
 
-        var obj = new MyObject;
+        var obj = new MyObject();
         qwe.init(obj, StateA, function(srcState, currState){
               this.hsm.trace('Previous state was: ' + srcState.name);
               this.hsm.trace('Current state is: ' + currState.name);
