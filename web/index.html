@@ -7,7 +7,7 @@
     <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link href="css/style.css" rel="stylesheet" type="text/css">
-    <script type="text/javascript" src="js/qwe.min.js"></script>
+    <script type="text/javascript" src="js/qwe.js"></script>
 </head>
 <body>
 <div id="container-box">
@@ -15,40 +15,44 @@
 
         <h2 id="diagramTitle">Click the on a state and watch the log</h2>
 
-        <div id="a-box" class="box">
+        <div id="StateA" class="state box">
             state <strong>A</strong>
 
-            <div id="b-box" class="box">
+            <div id="StateB" class="state box">
                 state <strong>B</strong> <span class="first-state">*</span>
 
-                <div id="c-box" class="box">
+                <div id="StateC" class="state box">
                     state <strong>C</strong>
 
-                    <div id="d-box" class="box">
+                    <div id="StateD" class="state box">
                         state <strong>D</strong> <span class="first-state">*</span><br/><br/>
                     </div>
-                    <div id="e-box" class="box">
+                    <div id="StateE" class="state box">
                         state <strong>E</strong><br/>
                     </div>
                 </div>
-                <div id="f-box" class="box">
+                <div id="StateF" class="state box">
                     state <strong>F</strong> <span class="first-state">*</span>
 
-                    <div id="g-box" class="box">
+                    <div id="StateG" class="state box">
                         state <strong>G</strong><br/>
                     </div>
-                    <div id="h-box" class="box">
+                    <div id="StateH" class="state box">
                         state <strong>H</strong> <span class="first-state">*</span><br/>
                     </div>
                 </div>
-                <div id="x-box" class="box">
+                <div id="StateX" class="state box">
                     state <strong>X</strong>
                 </div>
             </div>
-            <div id="y-box" class="box">
+            <div id="StateY" class="state box">
                 state <strong>Y</strong>
             </div>
         </div>
+        <div id="StateZ" class="state box">
+            state <strong>Z</strong>
+        </div>
+
     </div>
     <div id="right-col">
         <div id="right-col-container">
@@ -63,7 +67,7 @@
             </ul>
             <div id="log-container">
                 <h2>Log</h2>
-                <button id="reset">Restart</button>
+                <button id="clearButton">Clear</button>
                 <br/>
                 <textarea id="log" rows="23" cols="60" title="Log"></textarea>
             </div>
@@ -72,12 +76,95 @@
 </div>
 
 <script>
-    console.log('Hello world');
+    $(document).ready(function(){
+        qwe.dbgMode(true);
+        var log = $('#log');
+
+        var StateA = qwe.state('StateA');
+        StateA.trace  = function(text) {
+            var state = this.hsm.state;
+            log.append(state.name +': ' + text + '\n');
+        };
+        StateA.moveTo = function(e, state){ this.hsm.tran(state); };
+
+        var StateB = qwe.state('StateB', StateA);
+        var StateC = qwe.state('StateC', StateB, false);
+        var StateD = qwe.state('StateD', StateC);
+        var StateE = qwe.state('StateE', StateC);
+        var StateF = qwe.state('StateF', StateB);
+        var StateG = qwe.state('StateG', StateF, false);
+        var StateH = qwe.state('StateH', StateF);
+        var StateX = qwe.state('StateX', StateB);
+        var StateY = qwe.state('StateY', StateA);
+        var StateZ = qwe.state('StateZ');
+        // A Whole new state machine
+        StateZ.trace  = function(text) {
+            var state = this.hsm.state;
+            log.append(state.name +': ' + text + '\n');
+        };
+        StateZ.moveTo = function(e, state){ this.hsm.tran(state); };
+
+
+        function MyObject(){
+            // Put here any state you want
+        }
+
+        var obj = new MyObject;
+        qwe.init(obj, StateA, function(srcState, currState){
+              this.hsm.trace('Previous state was: ' + srcState.name);
+              this.hsm.trace('Current state is: ' + currState.name);
+        });
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // From here just the scene setup
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        log.html('');
+        log.append('qwe.dbgInspectState:\n');
+        log.append(qwe.dbgInspectState(StateA));
+        log.append('HSM Initialized\nClick on the diagram!\n');
+
+        function createEventHandler(state){
+            function handler(e){
+                log.html('');
+                log.append('clicked ' + state.name + '\n');
+                e.stopImmediatePropagation();
+                obj.hsm.send('moveTo', state);
+            }
+            return handler;
+        }
+
+        $('#StateA').on('click', createEventHandler(StateA));
+        $('#StateB').on('click', createEventHandler(StateB));
+        $('#StateC').on('click', createEventHandler(StateC));
+        $('#StateD').on('click', createEventHandler(StateD));
+        $('#StateE').on('click', createEventHandler(StateE));
+        $('#StateF').on('click', createEventHandler(StateF));
+        $('#StateG').on('click', createEventHandler(StateG));
+        $('#StateH').on('click', createEventHandler(StateH));
+        $('#StateX').on('click', createEventHandler(StateX));
+        $('#StateY').on('click', createEventHandler(StateY));
+        $('#StateZ').on('click', createEventHandler(StateZ));
+
+        $('#clearButton').on('click', function(){
+           log.html('');
+        });
+
+
+
+//        StateA)
+//        StateB)
+//        StateC)
+//        StateD)
+//        StateE)
+//        StateF)
+//        StateG)
+//        StateH)
+//        StateX)
+//        StateY)
+
+    });
+
 </script>
 </body>
 </html>
-
-
-<!--
-
-           -->

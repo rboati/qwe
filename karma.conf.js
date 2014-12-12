@@ -16,8 +16,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      {pattern: 'src/fhsm.js', include: true},
-      {pattern: 'test/test.js', include: true}
+      {pattern: 'src/qwe.js', include: true},
+      {pattern: 'test/test_web.js', include: true}
     ],
 
 

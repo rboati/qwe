@@ -598,7 +598,7 @@ function define(exportedArgs) {
                 enterPath.push(state);
                 state = state.__proto__;
             } else {
-                break;
+                break;    
             }
         }
 

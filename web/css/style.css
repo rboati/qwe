@@ -54,7 +54,6 @@ h2 {
     padding: 10px;
     text-align: center;
     border-radius: 10px;
-    border: 1px solid #3D3D3D;
     font-family: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
     font-size: 18px;
 }
@@ -64,46 +63,64 @@ h2 {
     font-size: 32px;
 }
 
-#a-box {
+#StateA {
 }
 
-#b-box {
-
-}
-
-#c-box {
+#StateB {
 
 }
 
-#d-box {
+#StateC {
+
+}
+
+#StateD {
     background-color: #7499ff
 }
 
-#e-box {
+#StateE {
     background-color: #7499ff
 }
 
-#f-box {
+#StateF {
 
 }
 
-#g-box {
+#StateG {
     background-color: #7499ff
 }
 
-#h-box {
+#StateH {
     background-color: #7499ff
 }
 
-#x-box {
+#StateX {
     background-color: #7499ff
 }
 
-#y-box {
+#StateY {
     background-color: #7499ff
 }
+
+#StateZ {
+    background-color: #7499ff
+}
+
 
 #diagramTitle {
     font-family: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
     font-size: 16px;
+}
+
+#log {
+    font-family: 'Droid Sans Mono', Menlo, Consolas, 'Courier New', Courier, monospace;
+    font-size: 14px;
+}
+
+.currentState{
+    border: 3px solid #3D3D3D;
+}
+
+.state{
+    border: 1px solid #3D3D3D;
 }
