@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/filasienof/qwe/wiki",
   "dependencies": {
-
   },
   "devDependencies": {
     "docco": "^0.6.3",
