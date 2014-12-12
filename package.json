@@ -22,8 +22,7 @@
     "url": "https://github.com/filasienof/qwe/issues"
   },
   "homepage": "https://github.com/filasienof/qwe/wiki",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "docco": "^0.6.3",
     "literate-programming": "^0.8.2",
