@@ -49,64 +49,6 @@ h2 {
     float: left;
 }
 
-.box {
-    margin: 8px;
-    padding: 10px;
-    text-align: center;
-    border-radius: 10px;
-    font-family: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
-    font-size: 18px;
-}
-
-.first-state {
-    font-family: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
-    font-size: 32px;
-}
-
-#StateA {
-}
-
-#StateB {
-
-}
-
-#StateC {
-
-}
-
-#StateD {
-    background-color: #7499ff
-}
-
-#StateE {
-    background-color: #7499ff
-}
-
-#StateF {
-
-}
-
-#StateG {
-    background-color: #7499ff
-}
-
-#StateH {
-    background-color: #7499ff
-}
-
-#StateX {
-    background-color: #7499ff
-}
-
-#StateY {
-    background-color: #7499ff
-}
-
-#StateZ {
-    background-color: #7499ff
-}
-
-
 #diagramTitle {
     font-family: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
     font-size: 16px;
@@ -117,10 +59,29 @@ h2 {
     font-size: 14px;
 }
 
-.currentState{
-    border: 3px solid #3D3D3D;
+.state {
+    margin: 8px;
+    padding: 10px;
+    text-align: center;
+    border-radius: 10px;
+    font-family: Segoe, "Segoe UI", "DejaVu Sans", "Trebuchet MS", Verdana, sans-serif;
+    font-size: 18px;
+    border: 1px solid #3D3D3D;
+    background-color: white;
 }
 
-.state{
-    border: 1px solid #3D3D3D;
+.state.leaf {
+    background-color: #7499ff;
 }
+
+.state.initial {
+}
+
+.state.initial.leaf {
+}
+
+.state.current {
+	background-color: #FF4064;
+}
+
+
